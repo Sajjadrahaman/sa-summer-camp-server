@@ -31,6 +31,7 @@ async function run() {
 
     const instructorsCollection = client.db('summerDB').collection('instructors');
     const classesCollection = client.db('summerDB').collection('classes');
+    const carsCollection = client.db('summerDB').collection('cars');
 
     // instructorsCollection
     app.get('/instructors', async(req, res) =>{
@@ -39,14 +40,19 @@ async function run() {
     })
 
 
-
-
     // classesCollection
     app.get('/classes', async(req, res) =>{
       const result = await classesCollection.find().toArray();
       res.send(result)
     })
 
+    // carsCollection
+    app.post('/carts', async(req, res)=>{
+      const item = req.body;
+      console.log(item);
+      const result = await carsCollection.insertOne(item);
+      res.send(result);
+    })
 
 
     
