@@ -37,6 +37,11 @@ async function run() {
     // users collection
     app.post('/users', async(req, res) =>{
       const user = req.body;
+      const query = {email: user.email}
+      const existingUser = await usersCollection.findOne(query);
+      if(existingUser){
+        return res.send({message: 'user already exists'})
+      }
       const result = await usersCollection.insertOne(user);
       res.send(result);
     })
@@ -69,7 +74,6 @@ async function run() {
 
     app.post('/carts', async(req, res)=>{
       const item = req.body;
-      console.log(item);
       const result = await carsCollection.insertOne(item);
       res.send(result);
     })
