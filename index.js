@@ -64,7 +64,7 @@ async function run() {
       const email = req.decoded.email;
       const query = {email: email}
       const user = await usersCollection.findOne(query);
-      if(user?.role !== 'admin' || user?.role !== 'instructor'  ){
+      if(user?.role !== 'admin'  ){
         return res.status(403).send({error: true, message: 'forbidden message'});
 
       }
@@ -145,17 +145,26 @@ async function run() {
 
 
     // instructorsCollection
-    app.get('/instructors', verifyJWT, async (req, res) => {
+    app.get('/instructors', async (req, res) => {
       const result = await instructorsCollection.find().toArray();
       res.send(result)
     })
 
 
+   
+
     // classesCollection
-    app.get('/classes', verifyJWT, async (req, res) => {
+    app.get('/classes', async (req, res) => {
       const result = await classesCollection.find().toArray();
       res.send(result)
     })
+
+    app.post('/classes', verifyJWT,  async(req, res)=>{
+      const newClass = req.body;
+      const result = await classesCollection.insertOne(newClass)
+      res.send(result)
+    })
+
 
     // carsCollection
     app.get('/carts', verifyJWT, async (req, res) => {
