@@ -222,10 +222,13 @@ async function run() {
     })
 
     // payment 
-    app.get('/payments', verifyJWT, async(req, res)=>{
+    app.get('/payments', async(req, res)=>{
       const result = await paymentsCollection.find().toArray();
       res.send(result)
     })
+
+   
+
     app.post('/payments', verifyJWT, async(req, res)=>{
         const payment = req.body;
         const insertResult = await paymentsCollection.insertOne(payment)
