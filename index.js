@@ -50,6 +50,7 @@ async function run() {
     const classesCollection = client.db('summerDB').collection('classes');
     const carsCollection = client.db('summerDB').collection('cars');
     const usersCollection = client.db('summerDB').collection('users');
+    const paymentsCollection = client.db('summerDB').collection('payments');
 
     // jwt
     app.post('/jwt', (req, res) => {
@@ -207,7 +208,7 @@ async function run() {
 
 
     // create payment
-    app.post('/create-payment-intent', async(req, res)=>{
+    app.post('/create-payment-intent', verifyJWT, async(req, res)=>{
       const {price} = req.body;
       const amount = price*100;
       const paymentIntent = await stripe.paymentIntents.create({
@@ -218,6 +219,19 @@ async function run() {
       res.send({
         clientSecret: paymentIntent.client_secret
       })
+    })
+
+    // payment 
+    app.get('/payments', verifyJWT, async(req, res)=>{
+      const result = await paymentsCollection.find().toArray();
+      res.send(result)
+    })
+    app.post('/payments', verifyJWT, async(req, res)=>{
+        const payment = req.body;
+        const insertResult = await paymentsCollection.insertOne(payment)
+        const query = {_id: {$in: payment.cartItem.map(id=> new ObjectId(id))}}
+        const deleteResult = await carsCollection.deleteMany(query)
+        res.send({ insertResult, deleteResult})
     })
 
 
