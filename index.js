@@ -62,19 +62,19 @@ async function run() {
 
 
 
-    const verifyAdmin = async(req, res, next) =>{
+    const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
-      const query = {email: email}
+      const query = { email: email }
       const user = await usersCollection.findOne(query);
-      if(user?.role !== 'admin'  ){
-        return res.status(403).send({error: true, message: 'forbidden message'});
+      if (user?.role !== 'admin') {
+        return res.status(403).send({ error: true, message: 'forbidden message' });
 
       }
       next();
     }
 
 
-    
+
 
 
 
@@ -95,12 +95,12 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/users/admin/:email', verifyJWT, async(req, res)=>{
+    app.get('/users/admin/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
-      const query = {email: email};
+      const query = { email: email };
 
-      if(req.decoded.email !== email){
-        res.send({admin: false})
+      if (req.decoded.email !== email) {
+        res.send({ admin: false })
       }
 
       const user = await usersCollection.findOne(query);
@@ -120,16 +120,16 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/users/instructor/:email', verifyJWT, async(req, res)=>{
+    app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
 
-      if(req.decoded.email !== email){
-        res.send({instructor: false})
+      if (req.decoded.email !== email) {
+        res.send({ instructor: false })
       }
 
-      const query = {email: email};
+      const query = { email: email };
       const user = await usersCollection.findOne(query);
-      const result = {instructor: user?.role === 'instructor'};
+      const result = { instructor: user?.role === 'instructor' };
       res.send(result);
     })
 
@@ -153,7 +153,7 @@ async function run() {
     })
 
 
-   
+
 
     // classesCollection
     app.get('/classes', async (req, res) => {
@@ -161,16 +161,16 @@ async function run() {
       res.send(result)
     })
 
- 
 
-    app.post('/classes', verifyJWT,  async(req, res)=>{
+
+    app.post('/classes', verifyJWT, async (req, res) => {
       const newClass = req.body;
       const result = await classesCollection.insertOne(newClass)
       res.send(result)
     })
 
 
-    
+
 
 
 
@@ -208,9 +208,9 @@ async function run() {
 
 
     // create payment
-    app.post('/create-payment-intent', verifyJWT, async(req, res)=>{
-      const {price} = req.body;
-      const amount = price*100;
+    app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+      const { price } = req.body;
+      const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: 'usd',
@@ -222,19 +222,28 @@ async function run() {
     })
 
     // payment 
-    app.get('/payments', async(req, res)=>{
-      const result = await paymentsCollection.find().toArray();
+
+    app.get('/payments', async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        const result = await paymentsCollection.find().toArray();
+        res.send(result)
+      }
+
+      const query = { email: email };
+      const result = await paymentsCollection.find(query).toArray();
       res.send(result)
-    })
 
-   
+    });
 
-    app.post('/payments', verifyJWT, async(req, res)=>{
-        const payment = req.body;
-        const insertResult = await paymentsCollection.insertOne(payment)
-        const query = {_id: {$in: payment.cartItem.map(id=> new ObjectId(id))}}
-        const deleteResult = await carsCollection.deleteMany(query)
-        res.send({ insertResult, deleteResult})
+
+
+    app.post('/payments', verifyJWT, async (req, res) => {
+      const payment = req.body;
+      const insertResult = await paymentsCollection.insertOne(payment)
+      const query = { _id: { $in: payment.cartItem.map(id => new ObjectId(id)) } }
+      const deleteResult = await carsCollection.deleteMany(query)
+      res.send({ insertResult, deleteResult })
     })
 
 
