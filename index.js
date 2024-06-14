@@ -120,6 +120,10 @@ async function run() {
       res.send(result)
     })
 
+
+
+
+
     app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
 
@@ -156,11 +160,34 @@ async function run() {
 
 
     // classesCollection
+
     app.get('/classes', async (req, res) => {
       const result = await classesCollection.find().toArray();
       res.send(result)
     })
 
+    app.get('/classes', async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        const result = await classesCollection.find().toArray();
+        res.send(result)
+      }
+
+      else {
+        const query = { email: email };
+        const result = await classesCollection.find(query).toArray();
+        res.send(result)
+      }
+
+    });
+
+
+    app.get('/classes/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await classesCollection.find(query).toArray();
+      res.send(result)
+    })
 
 
     app.post('/classes', verifyJWT, async (req, res) => {
@@ -168,6 +195,8 @@ async function run() {
       const result = await classesCollection.insertOne(newClass)
       res.send(result)
     })
+
+
 
 
 
@@ -230,11 +259,15 @@ async function run() {
         res.send(result)
       }
 
-      const query = { email: email };
-      const result = await paymentsCollection.find(query).toArray();
-      res.send(result)
+      else {
+        const query = { email: email };
+        const result = await paymentsCollection.find(query).toArray();
+        res.send(result)
+      }
 
     });
+
+
 
 
 
